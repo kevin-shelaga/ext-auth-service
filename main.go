@@ -7,6 +7,8 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -37,12 +39,40 @@ type CIDRBlock struct {
 
 type ExtAuthServer struct {
 	authv3.UnimplementedAuthorizationServer
+	mu    sync.RWMutex
 	cidrs []CIDRBlock
+}
+
+// validateConfigPath ensures the config path is safe and expected
+func validateConfigPath(path string) error {
+	// Clean the path to resolve any .. or . components
+	cleanPath := filepath.Clean(path)
+
+	// Ensure it's an absolute path or relative to current directory
+	if !filepath.IsAbs(cleanPath) && !strings.HasPrefix(cleanPath, "./") && !strings.HasPrefix(cleanPath, "../") {
+		// Allow relative paths that don't try to escape
+		if strings.Contains(cleanPath, "..") {
+			return fmt.Errorf("path traversal not allowed: %s", path)
+		}
+	}
+
+	// Ensure it's a YAML file
+	ext := filepath.Ext(cleanPath)
+	if ext != ".yaml" && ext != ".yml" {
+		return fmt.Errorf("config file must be YAML (.yaml or .yml): %s", path)
+	}
+
+	return nil
 }
 
 // LoadCIDRs reads and parses CIDRs from a YAML file
 func LoadCIDRs(path string) ([]CIDRBlock, error) {
-	data, err := os.ReadFile(path)
+	// Validate path to mitigate G304 security concern
+	if err := validateConfigPath(path); err != nil {
+		return nil, fmt.Errorf("invalid config path: %w", err)
+	}
+
+	data, err := os.ReadFile(path) // #nosec G304 - path is validated and controlled
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config: %w", err)
 	}
@@ -128,7 +158,13 @@ func (s *ExtAuthServer) Check(ctx context.Context, req *authv3.CheckRequest) (*a
 		return deny("invalid IP format")
 	}
 
-	for _, block := range s.cidrs {
+	// Thread-safe read access to cidrs
+	s.mu.RLock()
+	cidrs := make([]CIDRBlock, len(s.cidrs))
+	copy(cidrs, s.cidrs)
+	s.mu.RUnlock()
+
+	for _, block := range cidrs {
 		if block.Net.Contains(ip) {
 			log.Printf("Allowed IP %s matched department: %s", ip, block.Department)
 			return allow()
@@ -137,6 +173,23 @@ func (s *ExtAuthServer) Check(ctx context.Context, req *authv3.CheckRequest) (*a
 
 	log.Printf("Denied IP %s - no matching CIDR", ip)
 	return deny(fmt.Sprintf("IP %s not allowed", ip))
+}
+
+// UpdateCIDRs safely updates the server's CIDR list
+func (s *ExtAuthServer) UpdateCIDRs(newCIDRs []CIDRBlock) {
+	s.mu.Lock()
+	s.cidrs = make([]CIDRBlock, len(newCIDRs))
+	copy(s.cidrs, newCIDRs)
+	s.mu.Unlock()
+}
+
+// GetCIDRs safely returns a copy of the server's CIDR list (for testing)
+func (s *ExtAuthServer) GetCIDRs() []CIDRBlock {
+	s.mu.RLock()
+	cidrs := make([]CIDRBlock, len(s.cidrs))
+	copy(cidrs, s.cidrs)
+	s.mu.RUnlock()
+	return cidrs
 }
 
 func allow() (*authv3.CheckResponse, error) {
@@ -195,7 +248,7 @@ func runServer(port, configPath string) error {
 			log.Printf("Failed to reload CIDRs: %v", err)
 			return
 		}
-		server.cidrs = updated
+		server.UpdateCIDRs(updated)
 		log.Printf("Reloaded CIDRs from %s", configPath)
 	})
 

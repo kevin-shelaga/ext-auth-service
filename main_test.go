@@ -707,7 +707,7 @@ func TestConfigReloadDuringRequests(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Failed to reload CIDRs %d: %v", i, err)
 		}
-		server.cidrs = updated
+		server.UpdateCIDRs(updated)
 
 		time.Sleep(5 * time.Millisecond)
 	}
@@ -755,7 +755,7 @@ func TestRaceConditionInCIDRAccess(t *testing.T) {
 				newCIDRs := []CIDRBlock{
 					{Department: fmt.Sprintf("race-dept-%d", id), Net: mustParseCIDR("192.168.1.0/24")},
 				}
-				server.cidrs = newCIDRs
+				server.UpdateCIDRs(newCIDRs)
 				time.Sleep(time.Microsecond * 100)
 			}
 		}(i)
@@ -1234,8 +1234,8 @@ func TestMainConfigLoading(t *testing.T) {
 
 	// Test server creation
 	server := &ExtAuthServer{cidrs: cidrs}
-	if len(server.cidrs) != 1 {
-		t.Errorf("Expected server to have 1 CIDR, got %d", len(server.cidrs))
+	if len(server.GetCIDRs()) != 1 {
+		t.Errorf("Expected server to have 1 CIDR, got %d", len(server.GetCIDRs()))
 	}
 }
 
@@ -1267,7 +1267,7 @@ func TestMainConfigReloadLogic(t *testing.T) {
 			log.Printf("Failed to reload CIDRs: %v", err)
 			return
 		}
-		server.cidrs = updated
+		server.UpdateCIDRs(updated)
 		log.Printf("Reloaded CIDRs from %s", configPath)
 	}
 
@@ -1285,8 +1285,8 @@ func TestMainConfigReloadLogic(t *testing.T) {
 	// Test reload
 	reloadFunc()
 
-	if len(server.cidrs) != 2 {
-		t.Errorf("Expected 2 CIDRs after reload, got %d", len(server.cidrs))
+	if len(server.GetCIDRs()) != 2 {
+		t.Errorf("Expected 2 CIDRs after reload, got %d", len(server.GetCIDRs()))
 	}
 
 	// Test reload with invalid config
@@ -1303,8 +1303,8 @@ func TestMainConfigReloadLogic(t *testing.T) {
 	reloadFunc()
 
 	// Should still have the previous valid config
-	if len(server.cidrs) != 2 {
-		t.Errorf("Expected server to keep previous config after failed reload, got %d CIDRs", len(server.cidrs))
+	if len(server.GetCIDRs()) != 2 {
+		t.Errorf("Expected server to keep previous config after failed reload, got %d CIDRs", len(server.GetCIDRs()))
 	}
 }
 
@@ -1538,8 +1538,8 @@ func TestMainConfigPathHandling(t *testing.T) {
 
 	// Test server creation
 	server := &ExtAuthServer{cidrs: cidrs}
-	if len(server.cidrs) != 1 {
-		t.Errorf("Expected server to have 1 CIDR, got %d", len(server.cidrs))
+	if len(server.GetCIDRs()) != 1 {
+		t.Errorf("Expected server to have 1 CIDR, got %d", len(server.GetCIDRs()))
 	}
 
 	// Test that the default config path is correct
@@ -1645,7 +1645,7 @@ func TestMainIntegrationFlow(t *testing.T) {
 			t.Logf("Failed to reload CIDRs: %v", err)
 			return
 		}
-		server.cidrs = updated
+		server.UpdateCIDRs(updated)
 		reloadCount++
 		t.Logf("Reloaded CIDRs from %s", configPath)
 	}
@@ -1683,11 +1683,11 @@ func TestMainIntegrationFlow(t *testing.T) {
 	if server == nil {
 		t.Error("Server is nil")
 	}
-	if len(server.cidrs) != 1 {
-		t.Errorf("Expected 1 CIDR, got %d", len(server.cidrs))
+	if len(server.GetCIDRs()) != 1 {
+		t.Errorf("Expected 1 CIDR, got %d", len(server.GetCIDRs()))
 	}
-	if server.cidrs[0].Department != "integration-test" {
-		t.Errorf("Expected department 'integration-test', got '%s'", server.cidrs[0].Department)
+	if server.GetCIDRs()[0].Department != "integration-test" {
+		t.Errorf("Expected department 'integration-test', got '%s'", server.GetCIDRs()[0].Department)
 	}
 
 	// Step 10: Test graceful shutdown
@@ -1849,13 +1849,13 @@ func TestWatchConfigEdgeCases(t *testing.T) {
 		t.Fatalf("Failed to write initial config: %v", err)
 	}
 
-	reloadCount := 0
+	var reloadCount int32
 	done := make(chan struct{})
 
 	go func() {
 		defer close(done)
 		watchConfig(configPath, func() {
-			reloadCount++
+			atomic.AddInt32(&reloadCount, 1)
 		})
 	}()
 
@@ -1874,7 +1874,7 @@ func TestWatchConfigEdgeCases(t *testing.T) {
 	time.Sleep(600 * time.Millisecond)
 
 	// Should have triggered at least one reload due to debouncing
-	if reloadCount == 0 {
+	if atomic.LoadInt32(&reloadCount) == 0 {
 		t.Error("Expected at least one reload")
 	}
 }
