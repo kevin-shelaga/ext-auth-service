@@ -1,6 +1,6 @@
 # 🔐 Envoy External Authorization Service (gRPC, Go)
 
-[![Go Version](https://img.shields.io/badge/Go-1.25+-00ADD8?style=flat&logo=go)](https://golang.org/)
+[![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat&logo=go)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/example/envoy-ext-auth)](https://goreportcard.com/report/github.com/example/envoy-ext-auth)
 [![Code Coverage](https://img.shields.io/badge/Coverage-65.9%25-brightgreen)](https://github.com/example/envoy-ext-auth)
@@ -15,7 +15,7 @@ It allows or denies requests based on the **peer remote address** provided by En
 
 ## 📋 Requirements
 
-- **Go**: 1.25 or higher
+- **Go**: 1.23 or higher
 - **gRPC**: 1.73+ (included in dependencies)
 - **Docker**: 20.10+ (optional, for containerized deployment)
 - **Kubernetes**: 1.20+ (optional, for k8s deployment)
@@ -269,11 +269,19 @@ go fmt ./...
 golangci-lint run
 
 # Security scan
-gosec ./...
+make security
 
 # Dependency check
 go mod verify
 ```
+
+#### 🔒 Security Scanning
+
+The project uses [Gosec](https://github.com/securego/gosec) for security analysis. All security issues have been addressed:
+
+- **G304 (File Inclusion)**: Previously flagged for `os.ReadFile(path)` in config loading
+  - **Status**: ✅ **Resolved** - Added path validation and `#nosec` annotation
+  - **Mitigation**: Config paths are validated for safety (YAML files only, path traversal prevention)
 
 ---
 
