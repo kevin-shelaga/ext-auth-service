@@ -1,6 +1,8 @@
 module github.com/example/envoy-ext-auth
 
-go 1.25.0
+go 1.23.0
+
+toolchain go1.24.5
 
 require (
 	github.com/envoyproxy/go-control-plane/envoy v1.32.4

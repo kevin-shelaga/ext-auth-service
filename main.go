@@ -74,7 +74,11 @@ func watchConfig(path string, reload func()) {
 	if err != nil {
 		log.Fatalf("Failed to create watcher: %v", err)
 	}
-	defer watcher.Close()
+	defer func() {
+		if err := watcher.Close(); err != nil {
+			log.Printf("Failed to close watcher: %v", err)
+		}
+	}()
 
 	dir := filepath.Dir(path)
 	if err := watcher.Add(dir); err != nil {
