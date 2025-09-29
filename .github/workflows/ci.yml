@@ -60,7 +60,7 @@ jobs:
         go-version: 1.25.x
 
     - name: Run golangci-lint
-      uses: golangci/golangci-lint-action@v6
+      uses: golangci/golangci-lint-action@v8
       with:
         version: latest
 
@@ -77,9 +77,9 @@ jobs:
         go-version: 1.25.x
 
     - name: Run Gosec Security Scanner
-      uses: securecodewarrior/github-action-gosec@master
-      with:
-        args: './...'
+      run: |
+        go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
+        gosec ./...
 
   build:
     name: Build
@@ -131,12 +131,15 @@ jobs:
         GOOS=windows GOARCH=amd64 go build -o ext-authz-windows-amd64.exe .
 
     - name: Create Release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        files: |
+          ext-authz-linux-amd64
+          ext-authz-linux-arm64
+          ext-authz-darwin-amd64
+          ext-authz-darwin-arm64
+          ext-authz-windows-amd64.exe
+        generate_release_notes: true
         draft: false
         prerelease: false

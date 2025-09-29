@@ -60,6 +60,7 @@ lint:
 # Security scan
 security:
 	@echo "Running security scan..."
+	@which gosec > /dev/null || (echo "Installing gosec..." && go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest)
 	gosec ./...
 
 # Format code
@@ -107,8 +108,8 @@ build-all:
 # Install development tools
 install-tools:
 	@echo "Installing development tools..."
-	$(GOGET) github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-	$(GOGET) github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install github.com/securecodewarrior/gosec/v2/cmd/gosec@latest
 
 # Kubernetes deployment
 k8s-deploy:
