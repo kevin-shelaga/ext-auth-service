@@ -1,4 +1,4 @@
-module github.com/example/envoy-ext-auth
+module github.com/kevin-shelaga/envoy-ext-auth
 
 go 1.23.0
 

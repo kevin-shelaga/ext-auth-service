@@ -2,9 +2,9 @@
 
 [![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat&logo=go)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/kevin-shelaga/envoy-ext-auth)](https://goreportcard.com/report/github.com/example/envoy-ext-auth)
-[![Code Coverage](https://img.shields.io/badge/Coverage-65.9%25-brightgreen)](https://github.com/example/envoy-ext-auth)
-[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)](https://github.com/example/envoy-ext-auth)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kevin-shelaga/envoy-ext-auth)](https://goreportcard.com/report/github.com/kevin-shelaga/envoy-ext-auth)
+[![Code Coverage](https://img.shields.io/badge/Coverage-65.9%25-brightgreen)](https://github.com/kevin-shelaga/envoy-ext-auth)
+[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)](https://github.com/kevin-shelaga/envoy-ext-auth)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker)](Dockerfile)
 [![gRPC](https://img.shields.io/badge/gRPC-1.73+-4285F4?style=flat&logo=grpc)](https://grpc.io/)
 
@@ -203,7 +203,7 @@ Before deploying to production:
 
 ```bash
 # Clone the repository
-git clone https://github.com/example/envoy-ext-auth.git
+git clone https://github.com/kevin-shelaga/envoy-ext-auth.git
 cd envoy-ext-auth
 
 # Install dependencies
@@ -365,8 +365,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - 📖 **Documentation**: Check this README and inline code comments
-- 🐛 **Issues**: [GitHub Issues](https://github.com/example/envoy-ext-auth/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/example/envoy-ext-auth/discussions)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/kevin-shelaga/envoy-ext-auth/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/kevin-shelaga/envoy-ext-auth/discussions)
 
 ---
 
