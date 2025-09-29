@@ -2,7 +2,7 @@
 
 [![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?style=flat&logo=go)](https://golang.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/kevin-shelaga/envoy-ext-auth)](https://goreportcard.com/report/github.com/example/envoy-ext-auth)
+[![Go Report Card](https://goreportcard.com/badge/github.com/kevin-shelaga/envoy-ext-auth)](https://goreportcard.com/report/github.com/kevin-shelaga/envoy-ext-auth)
 [![Code Coverage](https://img.shields.io/badge/Coverage-65.9%25-brightgreen)](https://github.com/example/envoy-ext-auth)
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)](https://github.com/example/envoy-ext-auth)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker)](Dockerfile)
