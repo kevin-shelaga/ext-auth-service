@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ext-auth-service
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: ext-auth-service
+  replicas: 1
+  template:
+    metadata:
+      name: ext-auth-service
+      labels:
+        app: ext-auth-service
+        version: v1
+    spec:
+      securityContext:
+        runAsUser: 2000
+        fsGroup: 2000
+      containers:
+        - name: ext-auth-service
+          image: your-registry/ext-auth-service:latest
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/ext-authz
+              readOnly: false
+          env:
+            - name: TZ
+              value: America/New_York
+          ports:
+            - containerPort: 50051
+          readinessProbe:
+            grpc:
+              port: 50051
+            initialDelaySeconds: 3
+            periodSeconds: 30
+            failureThreshold: 3
+            successThreshold: 1
+          livenessProbe:
+            grpc:
+              port: 50051
+            initialDelaySeconds: 3
+            periodSeconds: 30
+            failureThreshold: 3
+            successThreshold: 1
+          resources:
+            limits:
+              cpu: 200m
+              memory: 100Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          terminationMessagePath: "/dev/termination-log"
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 2000
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: config-volume
+          configMap:
+            name: ext-authz-config
+            items:
+              - key: config.yaml
+                path: config.yaml

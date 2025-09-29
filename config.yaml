@@ -1,0 +1,13 @@
+# Example configuration for local development
+# Replace with your actual department names and CIDR ranges
+departments:
+ - name: "team-alpha"
+   cidrs:
+     - "192.168.1.0/24"
+     - "10.0.1.100/32"
+ - name: "team-beta"
+   cidrs:
+     - "192.168.2.0/24"
+ - name: "team-gamma"
+   cidrs:
+     - "172.16.0.0/16"

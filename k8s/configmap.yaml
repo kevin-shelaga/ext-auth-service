@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ext-authz-config
+  namespace: default
+data:
+  config.yaml: |
+   # Example configuration - replace with your actual values
+   departments:
+    - name: "team-alpha"
+      cidrs:
+        - "192.168.1.0/24"
+        - "10.0.1.100/32"
+    - name: "team-beta"
+      cidrs:
+        - "192.168.2.0/24"
+    - name: "team-gamma"
+      cidrs:
+        - "172.16.0.0/16"
